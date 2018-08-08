@@ -1,47 +1,108 @@
 import React, { Component } from 'react'
+import { Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
-//import ReactGoogleMapLoader from "react-google-maps-loader"
-//import ReactGoogleMap from "react-google-map"
-import GoogleMapReact from 'google-map-react'
+import ReactDOM from "react-dom";
 import PropTypes from 'prop-types'
 
-//trying out if props work
+import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
 
-const AnyReactComponent = ({ text }) => <div>{ text }</div>;
 
-const Marker = props => {
-  return <div className="SuperAwesomePin"></div>
+
+export class MapContainer extends Component {
+
+  static propTypes = {
+    restaurants: PropTypes.array.isRequired,
+    filteredRestaurants: PropTypes.array.isRequired,
+    selectRestaurant: PropTypes.func.isRequired,
+    updateQuery: PropTypes.func.isRequired
 }
 
-class Map extends Component {
-    static propTypes = {
-      restaurants: PropTypes.array.isRequired,
+  constructor(props) {
+    super(props);
+    this.state = {
+      showingInfoWindow: false,
+      activeMarker: {},
+      selectedPlace: {},
     }
-
-    
-
-
-render() {
-    console.log(this.props.restaurants);
-    return (
-      <div className='google-map' style={{ height: '100vh', width: '80%' }}>
-      <GoogleMapReact
-        bootstrapURLKeys={{ key: 'AIzaSyAeaZtQBOxtNuDB3Oaq6L9_CyqiM7ppwdo' }}
-        defaultCenter={{ lat: 46.3499985, lng: 25.7999992 }}
-        defaultZoom={ 13 }>
-        {this.props.restaurants.map(restaurant => { return 
-        <AnyReactComponent 
-          lat={restaurant.location.lat} 
-          lng={restaurant.location.lng} 
-          text={ "A tokom mar kivan" }
-        />})}
-        
-      </GoogleMapReact>
-    </div>
-     
-     
-    );
+    // binding this to event-handler functions
+    this.onMarkerClick = this.onMarkerClick.bind(this);
+    this.onMapClick = this.onMapClick.bind(this);
   }
+
+  /*componentDidUpdate() {
+    if(this.state.filteredRestaurants.length===[]){
+      this.setState((state) => ({
+        filteredRestaurants: state.filteredRestaurants=this.props.restaurants
+    }))
+    }
+  }*/
+
+  onMarkerClick = (props, marker, e) => {
+    this.setState({
+      selectedPlace: props,
+      activeMarker: marker,
+      showingInfoWindow: true
+    });
+  }
+
+  onMapClick = (props) => {
+    if (this.state.showingInfoWindow) {
+      this.setState({
+        showingInfoWindow: false,
+      });
+    }
+  }
+
+
+ render() {
+   
+  console.log(this.props.filteredRestaurants)
+
+   return(
+    <div className="mapContainer">
+      <div>
+        <h1>Restaurants in Harghita county</h1>
+          <input
+            type="text"
+            placeholder="Search by restaurant name"
+            value={this.props.query}
+            onChange={(event) => this.props.updateQuery(event.target.value)}
+          />
+          <div className="list">
+            {this.props.filteredRestaurants.map(restaurant => {return <div key={restaurant.id}>{restaurant.name}</div>})}
+          </div>
+      </div>
+    <Map google={this.props.google} zoom={9.5} initialCenter={{ lat: 46.36091, lng: 25.79985 }}
+    onClick = { this.onMapClick }>
+    { this.props.filteredRestaurants.map((restaurant, index) => {return(
+      <Marker
+      onClick = { this.onMarkerClick }
+      key = { index }
+      title = { restaurant.name }
+      position = { restaurant.location }
+      name = { restaurant.name }
+  />
+   )})}
+      
+      <InfoWindow onClose={this.onInfoWindowClose}
+      marker = { this.state.activeMarker }
+      visible = { this.state.showingInfoWindow }>
+      
+        <div>
+        <h2>{ this.state.activeMarker.title }</h2>
+        <p> { this.state.activeMarker.title } </p>
+      </div>
+      
+      </InfoWindow>
+
+</Map>
+</div>
+   ) 
+   
+ }
 }
 
-export default Map
+export default GoogleApiWrapper({
+ apiKey: ('AIzaSyAeaZtQBOxtNuDB3Oaq6L9_CyqiM7ppwdo')
+})(MapContainer)
+
