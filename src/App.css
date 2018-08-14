@@ -2,9 +2,41 @@
   text-align: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+html, body {
+
+}
+
+h1 {
+  color: #4169e1;
+  text-align: center;
+  background-color: #ffe4c4;
+}
+
+.selectedHeader{
+  background-color: #fffaf0;
+}
+
+.onClickSearch {
+  background-color: #808080;
+  font-size: 0.3 em;
+  line-height: 4.8px;
+  text-decoration: none;
+  color: #007f00;
+}
+
+.onClickSearch:hover {
+  color: #ff0000;
+}
+
+img {
+  height: 450px;
+  width: 300px;
+}
+
+.side {
+  position: absolute;
+  top: 150px;
+  left: 50%;
 }
 
 .App-header {
@@ -20,6 +52,26 @@
 
 .App-intro {
   font-size: large;
+}
+
+.list {
+  width: 20%;
+  float: left;
+}
+
+.map {
+  float: right;
+  width: 80%;
+}
+
+.backLink {
+  display: block;
+  top: 20px;
+  left: 15px;
+  width: 50px;
+  height: 53px;
+  background: white;
+  background-image: url('./back.svg');
 }
 
 @keyframes App-logo-spin {

@@ -1,20 +1,18 @@
 import React, { Component } from 'react'
-import { Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
-import ReactDOM from "react-dom";
 import PropTypes from 'prop-types'
-
-import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
-
+import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react'
 
 
 export class MapContainer extends Component {
 
   static propTypes = {
     restaurants: PropTypes.array.isRequired,
+    forSelectMarker: PropTypes.array.isRequired,
     filteredRestaurants: PropTypes.array.isRequired,
-    selectRestaurant: PropTypes.func.isRequired,
-    updateQuery: PropTypes.func.isRequired
+    updateQuery: PropTypes.func.isRequired,
+    updateMarker: PropTypes.func.isRequired,
+    clearMarker: PropTypes.func.isRequired
 }
 
   constructor(props) {
@@ -24,18 +22,10 @@ export class MapContainer extends Component {
       activeMarker: {},
       selectedPlace: {},
     }
-    // binding this to event-handler functions
     this.onMarkerClick = this.onMarkerClick.bind(this);
     this.onMapClick = this.onMapClick.bind(this);
   }
 
-  /*componentDidUpdate() {
-    if(this.state.filteredRestaurants.length===[]){
-      this.setState((state) => ({
-        filteredRestaurants: state.filteredRestaurants=this.props.restaurants
-    }))
-    }
-  }*/
 
   onMarkerClick = (props, marker, e) => {
     this.setState({
@@ -44,6 +34,7 @@ export class MapContainer extends Component {
       showingInfoWindow: true
     });
   }
+
 
   onMapClick = (props) => {
     if (this.state.showingInfoWindow) {
@@ -55,26 +46,41 @@ export class MapContainer extends Component {
 
 
  render() {
-   
-  console.log(this.props.filteredRestaurants)
+  let forMarker
+  const { forSelectMarker }=this.props
+    if(forSelectMarker.length===0){
+      forMarker=this.props.filteredRestaurants;
+    } else {
+      forMarker=forSelectMarker;
+    } 
+
 
    return(
     <div className="mapContainer">
       <div>
-        <h1>Restaurants in Harghita county</h1>
+        <h1>Restaurants in Harghita county available at Foursquare</h1>
+        <div className="list">
+          <div>
           <input
             type="text"
             placeholder="Search by restaurant name"
             value={this.props.query}
             onChange={(event) => this.props.updateQuery(event.target.value)}
           />
-          <div className="list">
-            {this.props.filteredRestaurants.map(restaurant => {return <div key={restaurant.id}>{restaurant.name}</div>})}
           </div>
+          {this.props.filteredRestaurants.map(restaurant =>
+            {return <Link to="/selected" onClick={(e) => {e.stopPropagation(); this.props.selectRestaurant(restaurant)}} className="onClickSearch" key={restaurant.id}>
+              <p onMouseEnter={(e) => {e.stopPropagation(); this.props.updateMarker(restaurant)}} 
+              onMouseLeave={(e) => {e.stopPropagation(); this.props.clearMarker()}}
+              >{restaurant.name}</p>
+              </Link>})}
+        </div>
       </div>
+    <div className="map">  
     <Map google={this.props.google} zoom={9.5} initialCenter={{ lat: 46.36091, lng: 25.79985 }}
-    onClick = { this.onMapClick }>
-    { this.props.filteredRestaurants.map((restaurant, index) => {return(
+    onClick = { this.onMapClick }
+      >
+    { forMarker.map((restaurant, index) => {return(
       <Marker
       onClick = { this.onMarkerClick }
       key = { index }
@@ -86,19 +92,18 @@ export class MapContainer extends Component {
       
       <InfoWindow onClose={this.onInfoWindowClose}
       marker = { this.state.activeMarker }
-      visible = { this.state.showingInfoWindow }>
-      
+      visible = { this.state.showingInfoWindow }
+      >
         <div>
-        <h2>{ this.state.activeMarker.title }</h2>
-        <p> { this.state.activeMarker.title } </p>
-      </div>
-      
+          <h2>{ this.state.activeMarker.title }</h2>
+          <p>Click restaurant's name on the list for details</p>
+        </div>
       </InfoWindow>
 
 </Map>
 </div>
-   ) 
-   
+</div>
+   )
  }
 }
 

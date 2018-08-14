@@ -1,11 +1,10 @@
-import React, { Component } from 'react';
-//import ReactDOM from 'react-dom';
-import { Route } from 'react-router-dom';
-import escapeRegExp from 'escape-string-regexp';
+import React, { Component } from 'react'
+import { Route } from 'react-router-dom'
+import escapeRegExp from 'escape-string-regexp'
 import sortBy from 'sort-by'
 import MapContainer from './Map'
 import Selected from './Selected'
-import './App.css';
+import './App.css'
 
 
 //implementing foursquare info, async call from API, setting initial state
@@ -17,7 +16,7 @@ var foursquare = require('react-foursquare')({
 
 var params = {
   "ll": "46.3696,25.7954",
-  "query": 'Restaurant'
+  "query": 'csarda restaurant'
 };
 
 class App extends Component {
@@ -27,6 +26,8 @@ class App extends Component {
      this.state = {
        restaurants: [],
        filteredRestaurants: [],
+       chosenRestaurant: {},
+       forSelectMarker: [],
        query: ''
      };
    }
@@ -35,16 +36,28 @@ class App extends Component {
       await foursquare.venues.getVenues(params)
       .then(res=> {
         this.setState({ restaurants: res.response.venues });
-        this.setState({ filteredRestaurants: this.state.restaurants });
+        this.setState({ filteredRestaurants: this.state.restaurants.sort(sortBy('name')) })
+        
       });
   }
 
-  /*pickedRestaurant=(restaurant) => {
-    console.log(restaurant)
+  pickedRestaurant=(restaurant) => {
     this.setState((state) => ({
-      chosenRestaurant: state.chosenRestaurant=restaurant
+      chosenRestaurant: restaurant
   }))
-  }*/
+  }
+
+  restaurantSelect=(restaurant) => {
+    this.setState((state) => ({
+      forSelectMarker: [restaurant]
+  }))
+  }
+
+  resetForMarker=() => {
+    this.setState((state) => ({
+      forSelectMarker: []
+  }))
+  }
 
   updateListAndMarkers=(string) => {
     
@@ -74,22 +87,36 @@ class App extends Component {
   render() {
 
     console.log(this.state.restaurants);
-    console.log(this.state.filteredRestaurants);
+    console.log(this.state.forSelectMarker);
     return (
       <div className="app">
       <Route exact path="/" render={() => (
           <MapContainer restaurants={this.state.restaurants}
           filteredRestaurants={this.state.filteredRestaurants}
+          forSelectMarker={this.state.forSelectMarker}
           updateQuery={(string) => {
                   this.updateListAndMarkers(string)
                 }}
-          selectRestaurant={(restaurant) => {
-                 this.pickedRestaurant(restaurant)
+          updateMarker={(restaurant) => {
+                 this.restaurantSelect(restaurant)
                 }}
+          selectRestaurant={(restaurant) => {
+                  this.pickedRestaurant(restaurant)
+          }}
+          clearMarker={() => {
+                  this.resetForMarker()
+          }}
         />
       )}/>
       <Route path="/selected" render={({ history }) => (
-            <Selected restaurants={this.state.restaurants}
+            <Selected chosenRestaurant={this.state.chosenRestaurant}
+            updateQuery={(string) => {
+                  this.updateListAndMarkers(string)
+                  history.push('/')
+                }}
+            resetChosen={() => {
+                  this.resetForMarker()
+            }}
         />
           )}/>
         </div>
