@@ -14,12 +14,10 @@ class Selected extends Component {
       }
 
       state = {
-        venuePhotos: [],
-        venueAddress: []
+        venuePhotos: []
       }
 
-//https://maps.googleapis.com/maps/api/geocode/json?latlng=40.714224,-73.961452&key=YOUR_API_KEY
-
+//getting extra info (if available)
       async componentDidMount() {
           fetch(API+this.props.chosenRestaurant.id+ENDOFAPIPHOTOS)
           .then(res => {
@@ -31,6 +29,7 @@ class Selected extends Component {
                 )
       }
 
+//required for "unzip" the complex path in fetched objects
       getNestedObject = (nestedObj, pathArr) => {
         return pathArr.reduce((obj, key) =>
             (obj && obj[key] !== 'undefined') ? obj[key] : undefined, nestedObj);
@@ -42,34 +41,30 @@ class Selected extends Component {
         const categories = this.getNestedObject(this.props.chosenRestaurant, ['categories', 0, 'name']);
         const country = this.getNestedObject(this.props.chosenRestaurant, ['location', 'country']);
         const address = this.getNestedObject(this.props.chosenRestaurant, ['location', 'address']);
-        console.log(this.props.chosenRestaurant)
-        console.log(this.state.venuePhotos)
-        console.log(categories)
-        console.log(photoPrefix)
-        console.log(photoSuffix)
-
 
         return (
           <div className="selected">
             <div className="selectedHeader">
-              <Link to="/" className="backLink" onClick={(e) => {e.stopPropagation(); this.props.updateQuery(''); this.props.resetChosen()}}></Link>
-              <h2>
+              <Link to="/" className="backLink" ariaCurrent="page" onClick={(e) => {e.stopPropagation(); this.props.updateQuery(''); this.props.resetChosen()}}></Link>
+              <h2 tabindex="0">
                 {this.props.chosenRestaurant.name}
               </h2>
-            </div>  
-              <figure>
+
+              <figure tabIndex="0">
                 <img src={`${photoPrefix}400x600${photoSuffix}`} alt={`Snapshot is not available at Foursquare database about ${this.props.chosenRestaurant.name}`}/>
                 <figcaption>Picture from Foursquare about {this.props.chosenRestaurant.name}</figcaption>
               </figure>
 
+              </div>
+
               <div className="side">
-                <h4>Categories:</h4>
-                <p>{ categories }</p>
-                <h5>Country:</h5>
-                <p>{ country }</p>
-                <h6>Address(if available):</h6>
-                <p>{ address }</p>
-              </div>  
+                <h4 tabIndex="0">Categories:</h4>
+                <p tabIndex="0">{ categories }</p>
+                <h5 tabIndex="0">Country:</h5>
+                <p tabIndex="0">{ country }</p>
+                <h6 tabIndex="0">Address(if available):</h6>
+                <p tabIndex="0">{ address }</p>
+              </div>
           </div>
             )
     }

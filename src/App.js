@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Route } from 'react-router-dom'
 import escapeRegExp from 'escape-string-regexp'
 import sortBy from 'sort-by'
-import MapContainer from './Map'
+import MapContainer from './MapContainer'
 import Selected from './Selected'
 import './App.css'
 
@@ -32,37 +32,25 @@ class App extends Component {
      };
    }
 
-  async componentDidMount() {    
+  //sets the default state
+  async componentDidMount() {
       await foursquare.venues.getVenues(params)
       .then(res=> {
         this.setState({ restaurants: res.response.venues });
         this.setState({ filteredRestaurants: this.state.restaurants.sort(sortBy('name')) })
-        
       });
   }
 
+  //functions changing the states accessible from children components
   pickedRestaurant=(restaurant) => {
     this.setState((state) => ({
       chosenRestaurant: restaurant
   }))
   }
 
-  restaurantSelect=(restaurant) => {
-    this.setState((state) => ({
-      forSelectMarker: [restaurant]
-  }))
-  }
-
-  resetForMarker=() => {
-    this.setState((state) => ({
-      forSelectMarker: []
-  }))
-  }
-
   updateListAndMarkers=(string) => {
-    
+    //clearing up a bot the query string - trim for erasing white spaces before and after
     const query = string.trim()
-
     this.setState((state) => ({
       query: state.query=query
   }))
@@ -70,14 +58,17 @@ class App extends Component {
 
       let showingListAndMarkers;
       if (query) {
+        //if there is a certain query match it with regExp and then filter restaurants setting state
           const match = new RegExp(escapeRegExp(query), 'i')
           showingListAndMarkers = this.state.restaurants.filter((restaurant) => match.test(restaurant.name))
       } else {
+        // if there is no query
           showingListAndMarkers = this.state.restaurants
       }
-  
+
+      //sort venues in alphabetical order
       showingListAndMarkers.sort(sortBy('name'))
-  
+
       this.setState((state) => ({
         filteredRestaurants: state.filteredRestaurants=showingListAndMarkers
   }))
@@ -86,9 +77,10 @@ class App extends Component {
 
   render() {
 
-    console.log(this.state.restaurants);
-    console.log(this.state.forSelectMarker);
+    //console.log(this.state.restaurants);
+    //console.log(this.state.forSelectMarker);
     return (
+      //setting up the route for links in children components
       <div className="app">
       <Route exact path="/" render={() => (
           <MapContainer restaurants={this.state.restaurants}
@@ -97,14 +89,8 @@ class App extends Component {
           updateQuery={(string) => {
                   this.updateListAndMarkers(string)
                 }}
-          updateMarker={(restaurant) => {
-                 this.restaurantSelect(restaurant)
-                }}
           selectRestaurant={(restaurant) => {
                   this.pickedRestaurant(restaurant)
-          }}
-          clearMarker={() => {
-                  this.resetForMarker()
           }}
         />
       )}/>
@@ -116,6 +102,7 @@ class App extends Component {
                 }}
             resetChosen={() => {
                   this.resetForMarker()
+                  history.push('/')
             }}
         />
           )}/>
