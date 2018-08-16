@@ -13,4 +13,4 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ### Open the project
 
-Clone the repository from github `http://` and run 'npm install' then 'npm start' to run it. It will open via localhost.
+Clone the repository from github `https://github.com/putyi/Neighborhood-Map-React-.git` and run 'npm install' then 'npm start' to run it. It will open via localhost.
